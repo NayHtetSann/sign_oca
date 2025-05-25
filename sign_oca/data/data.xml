@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record model="sign.oca.field" id="sign_item_type_signature">
+        <field name="name">Signature</field>
+        <field name="item_type">signature</field>
+        <field name="tip">sign it</field>
+        <field name="placeholder">Signature</field>
+        <field name="default_width" type="float">0.200</field>
+        <field name="default_height" type="float">0.050</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_initial">
+        <field name="name">Initials</field>
+        <field name="item_type">initial</field>
+        <field name="tip">mark it</field>
+        <field name="placeholder">Initials</field>
+        <field name="default_width" type="float">0.085</field>
+        <field name="default_height" type="float">0.030</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_name">
+        <field name="name">Name</field>
+        <field name="placeholder">Name</field>
+        <field name="auto_field">name</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_email">
+        <field name="name">Email</field>
+        <field name="placeholder">Email</field>
+        <field name="auto_field">email</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_phone">
+        <field name="name">Phone</field>
+        <field name="placeholder">Phone</field>
+        <field name="auto_field">phone</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_company">
+        <field name="name">Company</field>
+        <field name="placeholder">Company</field>
+        <field name="auto_field">company_id.name</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_text">
+        <field name="name">Text</field> <!-- default: type 'text', tip 'fill in', empty placeholder, default_width and default_height, no auto_field -->
+        <field name="placeholder">Text</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_multiline_text">
+        <field name="name">Multiline Text</field>
+        <field name="placeholder">Multiline Text</field>
+        <field name="item_type">textarea</field>
+        <field name="default_width" type="float">0.300</field>
+        <field name="default_height" type="float">0.0500</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_checkbox">
+        <field name="name">Checkbox</field>
+        <field name="placeholder">&#9745;</field>
+        <field name="item_type">checkbox</field>
+        <field name="default_width" type="float">0.028</field>
+        <field name="default_height" type="float">0.025</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_selection">
+        <field name="name">Selection</field>
+        <field name="item_type">selection</field>
+        <field name="placeholder">Selection</field>
+        <field name="tip">Select an option</field>
+        <field name="default_width" type="float">0.300</field>
+        <field name="default_height" type="float">0.030</field>
+    </record>
+
+    <record model="sign.oca.field" id="sign_item_type_date">
+        <field name="name">Date</field>
+        <field name="placeholder">Date</field>
+    </record>
+    <!-- sign oca role -->
+    <record id="sign_role_customer" model="sign.oca.role">
+        <field name="name">Customer</field>
+        <field name="domain">[]</field>
+    </record>
+    <record id="sign_role_company" model="sign.oca.role">
+        <field name="name">Company</field>
+    </record>
+    <record id="sign_role_employee" model="sign.oca.role">
+        <field name="name">Employee</field>
+    </record>
+
+    <!-- sign oca data -->
+    <record id="attachment_sign_tour" model="ir.attachment">
+        <field name="name">Sample Contract.pdf</field>
+        <field name="datas" type="base64" file="sign_oca/demo/sample_contract.pdf"/>
+        <field name="mimetype">application/pdf</field>
+    </record>
+    <record id="template_sign_tour" model="sign.oca.template">
+        <field name="name">simple_contract.pdf</field>
+        <field name="attachment_id" ref="attachment_sign_tour"/>
+        <field name="share_link">tour-template</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Template tags -->
+    <record id="sign_template_tag_1" model="sign.template.tag">
+        <field name="name">HR</field>
+        <field name="color">2</field>
+    </record>
+    <record id="sign_template_tag_2" model="sign.template.tag">
+        <field name="name">NDA</field>
+        <field name="color">3</field>
+    </record>
+    <record id="sign_template_tag_3" model="sign.template.tag">
+        <field name="name">Sales</field>
+        <field name="color">4</field>
+    </record>
+
+</odoo>
