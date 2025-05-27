@@ -539,8 +539,8 @@ odoo.define('sign_oca.utils', function (require) {
                 if (option_id >= 0 || !value) {
                     return false;
                 }
-                ajax.rpc('/web/dataset/call_kw/sign.template/add_option', {
-                    model: 'sign.template',
+                ajax.rpc('/web/dataset/call_kw/sign.oca.template/add_option', {
+                    model: 'sign.oca.template',
                     method: 'add_option',
                     args: [value],
                     kwargs: {}
