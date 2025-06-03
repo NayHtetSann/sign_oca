@@ -91,6 +91,26 @@ class SignController(http.Controller):
             'sign_item_select_options': sign_request.template_id.item_ids.mapped('option_ids'),
         }
 
+    @http.route(['/sign_oca/<link>'], type='http', auth='public')
+    def share_link(self, link, **post):
+        template = http.request.env['sign.oca.template'].sudo().search([('share_link', '=', link)], limit=1)
+        if not template:
+            return http.request.not_found()
+
+        sign_request = http.request.env['sign.oca.request'].with_user(template.create_uid).create({
+            'template_id': template.id,
+            'name': "%(template_name)s-public" % {'template_name': template.attachment_id.name},
+            'favorited_ids': [(4, template.create_uid.id)],
+        })
+
+        request_item = http.request.env['sign.oca.request.signer'].sudo().create(
+            {'request_id': sign_request.id, 'role_id': template.item_ids.mapped('role_id').id})
+        sign_request.action_sent()
+
+        return http.redirect_with_hash(
+            '/sign_oca/document/%(request_id)s/%(access_token)s' % {'request_id': sign_request.id,
+                                                                'access_token': request_item.access_token})
+
     @http.route(["/sign_oca/get_document/<int:id>/<token>"], type='json', auth='user')
     def get_document(self, id, token):
         return http.Response(template='sign_oca._doc_sign', qcontext=self.get_document_qweb_context(id, token)).render()
@@ -189,7 +209,7 @@ class SignController(http.Controller):
 
         # mark signature as done in next activity
         user_ids = http.request.env['res.users'].search([('partner_id', '=', request_item.partner_id.id)])
-        sign_users = user_ids.filtered(lambda u: u.has_group('sign.group_sign_employee'))
+        sign_users = user_ids.filtered(lambda u: u.has_group('sign_oca.sign_oca_group_user'))
         for sign_user in sign_users:
             request_item.request_id.activity_feedback(['mail.mail_activity_data_todo'], user_id=sign_user.id)
 
@@ -245,6 +265,18 @@ class SignController(http.Controller):
         elif sign_request_user and signature_type == 'initial':
             return sign_request_user.sign_initials
         return False
+
+    @http.route(['/sign_oca/send_public/<int:id>/<token>'], type='json', auth='public')
+    def make_public_user(self, id, token, name=None, mail=None):
+        sign_request = http.request.env['sign.oca.request'].sudo().search([('id', '=', id), ('access_token', '=', token)])
+        if not sign_request or len(sign_request.signer_ids) != 1 or sign_request.signer_ids.partner_id:
+            return False
+
+        ResPartner = http.request.env['res.partner'].sudo()
+        partner = ResPartner.search([('email', '=', mail)], limit=1)
+        if not partner:
+            partner = ResPartner.create({'name': name, 'email': mail})
+        sign_request.signer_ids[0].write({'partner_id': partner.id})
 
     @http.route(['/sign_oca/encrypted/<int:sign_request_id>'], type='json', auth='public')
     def check_encrypted(self, sign_request_id):

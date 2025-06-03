@@ -5,13 +5,15 @@
         <field name="name">Sign</field>
     </record>
      <!-- Access Groups -->
+
      <record id="sign_oca_group_user" model="res.groups">
-        <field name="name">User: Own Documents Only</field>
+        <field name="name">Employee Own File</field>
         <field name="category_id" ref="sign_oca_module_category" />
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]" />
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
+
     <record id="sign_oca_group_manager" model="res.groups">
-        <field name="name">User: All Documents</field>
+        <field name="name">User: Own and Shared Templates</field>
         <field name="category_id" ref="sign_oca_module_category" />
         <field name="implied_ids" eval="[(4, ref('sign_oca_group_user'))]" />
     </record>
@@ -24,63 +26,172 @@
             eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"
         />
     </record>
-    <!-- Record Rules -->
-    <record id="sign_oca_request_signer_rule_base_user_read" model="ir.rule">
-        <field name="name">Sign Request base users: read</field>
-        <field name="model_id" ref="model_sign_oca_request_signer" />
-        <field
-            name="domain_force"
-        >[('partner_id', 'child_of', [user.partner_id.commercial_partner_id.id])]</field>
-        <field name="groups" eval="[(4, ref('base.group_user'))]" />
-        <field name="perm_read" eval="1" />
-        <field name="perm_create" eval="0" />
-        <field name="perm_write" eval="0" />
-        <field name="perm_unlink" eval="0" />
+
+    <record id="base.default_user" model="res.users">
+        <field name="groups_id" eval="[(4,ref('sign_oca_group_admin'))]"/>
     </record>
-    <!-- User Record Rules -->
-    <record id="sign_oca_request_rule_user_read" model="ir.rule">
-        <field name="name">Sign Request user: read</field>
-        <field name="model_id" ref="model_sign_oca_request" />
-        <field
-            name="domain_force"
-        >[('message_partner_ids', 'child_of', [user.partner_id.commercial_partner_id.id])]</field>
-        <field name="groups" eval="[(4, ref('sign_oca_group_user'))]" />
-        <field name="perm_read" eval="1" />
-        <field name="perm_create" eval="0" />
-        <field name="perm_write" eval="0" />
-        <field name="perm_unlink" eval="0" />
+
+
+    <!-- ir rules -->
+    <record id="ir_rule_sign_oca_template_sign_oca_group_manager" model="ir.rule">
+        <field name="name">sign.oca.template: sign_oca_group_manager: Manage favorited templates</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_template"/>
+        <field name="domain_force">[('favorited_ids', 'in', user.id)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_manager'))]"/>
     </record>
-    <record id="sign_oca_request_signer_rule_user_read" model="ir.rule">
-        <field name="name">Sign Request Signer user: read</field>
-        <field name="model_id" ref="model_sign_oca_request_signer" />
-        <field
-            name="domain_force"
-        >[('request_id.message_partner_ids', 'child_of', [user.partner_id.commercial_partner_id.id])]</field>
-        <field name="groups" eval="[(4, ref('sign_oca_group_user'))]" />
-        <field name="perm_read" eval="1" />
-        <field name="perm_create" eval="0" />
-        <field name="perm_write" eval="0" />
-        <field name="perm_unlink" eval="0" />
+
+    <record id="ir_rule_sign_oca_template_sign_oca_group_user" model="ir.rule">
+        <field name="name">sign.oca.template: sign_oca_group_user: Manage favorited templates</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_template"/>
+        <field name="domain_force">[('favorited_ids', 'in', user.id)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_user'))]"/>
     </record>
-    <!-- Manager record rules !-->
-    <record id="sign_oca_request_rule_manager_read" model="ir.rule">
-        <field name="name">Sign Request manager: read</field>
-        <field name="model_id" ref="model_sign_oca_request" />
+
+    <record id="ir_rule_sign_oca_template_access_sign_oca_group_user" model="ir.rule">
+        <field name="name">sign.template: sign_oca_group_user: seen template access</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_template"/>
+        <field name="domain_force">[('group_ids', 'in', user.groups_id.ids)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_user'))]"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_template_item_access_sign_oca_group_user" model="ir.rule">
+        <field name="name">sign.template: sign_oca_group_user: seen template item access</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_template_item"/>
+        <field name="domain_force">['|', ('template_id.group_ids', 'in', user.groups_id.ids), ('create_uid', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_user'))]"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_template_item_access_sign_oca_group_manager" model="ir.rule">
+        <field name="name">sign.template: sign_oca_group_manager: seen all template item</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_template_item"/>
         <field name="domain_force">[(1, '=', 1)]</field>
-        <field name="groups" eval="[(4, ref('sign_oca_group_manager'))]" />
-        <field name="perm_read" eval="1" />
-        <field name="perm_create" eval="0" />
-        <field name="perm_write" eval="0" />
-        <field name="perm_unlink" eval="0" />
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_manager'))]"/>
     </record>
-    <record id="sign_oca_request_signer_rule_manager_read" model="ir.rule">
-        <field name="name">Sign Request Signer manager: read</field>
-        <field name="model_id" ref="model_sign_oca_request_signer" />
+
+    <record id="ir_rule_sign_oca_template_sign_oca_group_admin" model="ir.rule">
+        <field name="name">sign.oca.template: sign_oca_group_admin: Manage all templates</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_template"/>
         <field name="domain_force">[(1, '=', 1)]</field>
-        <field name="groups" eval="[(4, ref('sign_oca_group_manager'))]" />
-        <field name="perm_read" eval="1" />
-        <field name="perm_create" eval="0" />
-        <field name="perm_write" eval="0" />
-        <field name="perm_unlink" eval="0" />
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_admin'))]"/>
     </record>
+
+    <record id="ir_rule_sign_oca_request_sign_oca_group_manager_create" model="ir.rule">
+        <field name="name">sign.oca.request: sign_oca_group_manager: Create requests on favorite and public templates</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request"/>
+        <field name="domain_force">['|', ('template_id.favorited_ids', 'in', user.id), ('template_id.privacy', '=', 'employee')]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_manager'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_request_sign_oca_group_manager_modify" model="ir.rule">
+        <field name="name">sign.oca.request: sign_oca_group_manager: Allow to edit favorited requests</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request"/>
+        <field name="domain_force">[('favorited_ids', 'in', user.id)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_request_sign_oca_group_user_modify" model="ir.rule">
+        <field name="name">sign.oca.request: sign_oca_group_user: Allow to edit favorited requests</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request"/>
+        <field name="domain_force">[('favorited_ids', 'in', user.id)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_request_sign_oca_group_manager_modify" model="ir.rule">
+        <field name="name">sign.oca.request: sign_oca_group_manager: Read the requests that I follow</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request"/>
+        <field name="domain_force">[('message_partner_ids', 'in', user.partner_id.ids)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_request_sign_oca_group_user_modify" model="ir.rule">
+        <field name="name">sign.oca.request: sign_oca_group_user: Read the requests that I follow</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request"/>
+        <field name="domain_force">[('message_partner_ids', 'in', user.partner_id.ids)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_request_sign_oca_group_admin" model="ir.rule">
+        <field name="name">sign.oca.request: sign_oca_group_admin: Manage all requests</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_admin'))]"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_request_log_sign_oca_group_manager_modify" model="ir.rule">
+        <field name="name">sign.oca.request.log: sign_oca_group_manager: Allow to read logs of own requests</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request_log"/>
+        <field name="domain_force">[('request_id.favorited_ids', 'in', user.id)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_request_log_sign_oca_group_user_modify" model="ir.rule">
+        <field name="name">sign.oca.request.log: sign_oca_group_user: Allow to read logs of own requests</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request_log"/>
+        <field name="domain_force">[('request_id.favorited_ids', 'in', user.id)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="ir_rule_sign_oca_request_log_sign_oca_group_admin" model="ir.rule">
+        <field name="name">sign.oca.request.log: sign_oca_group_admin: See all logs</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request_log"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('sign_oca.sign_oca_group_admin'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Portal Access Rules -->
+    <record id="ir_rule_sign_oca_request_portal" model="ir.rule">
+        <field name="name">Portal Personal Sign Request</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request"/>
+        <field name="domain_force">[('message_partner_ids','child_of',[user.partner_id.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        <field name="perm_unlink" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+    </record>
+
+    <record id="sign_oca_request_signer_rule_portal" model="ir.rule">
+        <field name="name">Portal Sign Requests Signer</field>
+        <field name="model_id" ref="sign_oca.model_sign_oca_request_signer"/>
+        <field name="domain_force">[('message_partner_ids','child_of',[user.partner_id.id])]</field>
+        <field name="perm_unlink" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
+
+
 </odoo>

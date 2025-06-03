@@ -236,7 +236,7 @@
                     odoo.define("sign.document_custom_page", function (require) {
                         var ajax = require("web.ajax");
                         var core = require("web.core");
-                        var document_signing = require("sign.document_signing");
+                        var document_signing = require("sign_oca.document_signing");
                         var rootWidget = require('root.widget');
                         // YTI FIXME We need the tour to wait the Tip template to be loaded
                         odoo.__TipTemplateDef = ajax.loadXML("/web_tour/static/src/xml/tip.xml", core.qweb).then(function () {

@@ -16,6 +16,7 @@
         "data/data.xml",
         "data/mail_template.xml",
         "wizards/sign_oca_send_request.xml",
+        "wizards/sign_oca_share_template.xml",
         "wizards/sign_oca_template_generate.xml",
         "wizards/sign_oca_template_generate_multi.xml",
         "views/res_partner_views.xml",

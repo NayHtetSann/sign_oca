@@ -8,6 +8,7 @@ import re
 import base64
 import io
 from odoo.tools import pdf
+from odoo.exceptions import AccessError
 
 
 class SignTemplateTag(models.Model):
@@ -73,6 +74,7 @@ class SignOcaTemplate(models.Model):
     tag_ids = fields.Many2many('sign.template.tag', string='Tags')
     color = fields.Integer()
     item_ids = fields.One2many("sign.oca.template.item", inverse_name="template_id")
+    responsible_count = fields.Integer(compute='_compute_responsible_count', string="Responsible Count")
     request_count = fields.Integer(compute="_compute_request_count")
     model_id = fields.Many2one(
         comodel_name="ir.model",
@@ -96,6 +98,18 @@ class SignOcaTemplate(models.Model):
                                     "- On Invitation: only invited users can view and use the template\n"
                                     "Invited users can always edit the document template.\n"
                                     "Existing requests based on this template will not be affected by changes.")
+
+    @api.model
+    def create(self, vals):
+        if 'active' in vals and vals['active'] and not self.env.user.has_group('sign_oca.sign_oca_group_manager'):
+            raise AccessError(_("Do not have access to create templates"))
+
+        return super(SignOcaTemplate, self).create(vals)
+
+    @api.depends('item_ids.role_id')
+    def _compute_responsible_count(self):
+        for template in self:
+            template.responsible_count = len(template.item_ids.mapped('role_id'))
 
     @api.model
     def update_from_pdfviewer(self, template_id=None, duplicate=None, sign_items=None, name=None):

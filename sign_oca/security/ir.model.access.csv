@@ -24,3 +24,4 @@ access_sign_template_tag_admin,sign_oca_template_tag_admin,model_sign_template_t
 access_sign_oca_send_request,sign_oca_send_request,model_sign_oca_send_request,,1,1,1,1
 access_sign_oca_send_request_signer,sign_oca_send_request_signer,model_sign_oca_send_request_signer,,1,1,1,1
 access_sign_oca_request_signer_value,sign_oca_request_signer_value,model_sign_oca_request_signer_value,,1,1,1,1
+access_sign_oca_share_template,sign_oca_share_template,model_sign_oca_template_share,,1,1,1,1

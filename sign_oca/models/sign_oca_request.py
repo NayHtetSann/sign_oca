@@ -92,6 +92,7 @@ class SignOcaRequest(models.Model):
         default=lambda self: self.env.user,
         required=True,
     )
+    favorited_ids = fields.Many2many('res.users', string="Favorite of")
     record_ref = fields.Reference(
         lambda self: [
             (m.model, m.name)
@@ -759,7 +760,6 @@ class SignOcaRequestSigner(models.Model):
     def _default_access_token(self):
         return str(uuid.uuid4())
 
-
     data = fields.Binary(attachment=True)
     access_token = fields.Char(required=True, default=_default_access_token, readonly=True)
     access_via_link = fields.Boolean('Accessed Through Token')
@@ -767,9 +767,9 @@ class SignOcaRequestSigner(models.Model):
     signer_value_ids = fields.One2many('sign.oca.request.signer.value', 'signer_id', string="Value")
     reference = fields.Char(related='request_id.name', string="Document Name")
     partner_name = fields.Char(related="partner_id.name")
-    partner_id = fields.Many2one("res.partner", required=True, ondelete="restrict")
+    partner_id = fields.Many2one("res.partner", string='Contact', ondelete="restrict")
     signer_email = fields.Char(related='partner_id.email', readonly=False, depends=(['partner_id']), store=True)
-    role_id = fields.Many2one("sign.oca.role", required=True, ondelete="restrict")
+    role_id = fields.Many2one("sign.oca.role", ondelete="restrict")
     signed_on = fields.Datetime(readonly=True)
     signature_hash = fields.Char(readonly=True)
     sms_token = fields.Char('SMS Token', readonly=True)
@@ -1092,8 +1092,6 @@ class SignRequestLog(models.Model):
 
     user_id = fields.Many2one(
         "res.users",
-        required=True,
-        readonly=True,
         ondelete="cascade",
         default=lambda r: r.env.user.id,
     )
@@ -1101,7 +1099,7 @@ class SignRequestLog(models.Model):
         required=True, default=lambda r: fields.Datetime.now()
     )
     partner_id = fields.Many2one(
-        "res.partner", required=True, default=lambda r: r.env.user.partner_id.id
+        "res.partner", default=lambda r: r.env.user.partner_id.id
     )
     request_id = fields.Many2one("sign.oca.request", required=True, ondelete="cascade")
     signer_id = fields.Many2one("sign.oca.request.signer")
@@ -1117,18 +1115,17 @@ class SignRequestLog(models.Model):
     )
     access_token = fields.Char(readonly=True)
     ip = fields.Char(readonly=True)
-    latitude = fields.Float(digits=(10, 7), groups="sign.group_sign_manager")
-    longitude = fields.Float(digits=(10, 7), groups="sign.group_sign_manager")
+    latitude = fields.Float(digits=(10, 7))
+    longitude = fields.Float(digits=(10, 7))
     log_hash = fields.Char(string="Inalterability Hash", readonly=True, copy=False)
     request_state = fields.Selection([
         ("sent", "Before Signature"),
         ("signed", "After Signature"),
         ("canceled", "Canceled")
-    ], required=True, string="State of the request on action log", groups="sign.group_sign_manager")
+    ], required=True, string="State of the request on action log", groups="sign.sign_oca_group_manager")
 
     def _get_or_check_hash(self, vals):
         """ Returns the hash to write on sign log entries """
-        print(vals, 'what is included ---')
         if vals['action'] not in ['sign', 'create']:
             return False
         # When we check the hash, we need to restrict the previous activity to logs created before

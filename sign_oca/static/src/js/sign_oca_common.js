@@ -1266,7 +1266,7 @@ odoo.define('sign_oca.document_signing', function (require) {
         start: async function () {
             var self = this;
             var result = false;
-            var canReadRequestItem = await session.user_has_group('sign_oca.sign_oca_group_user');
+            var canReadRequestItem = await session.user_has_group('sign_oca.sign_oca_group_manager');
             if (canReadRequestItem) {
                 result = await this._rpc({
                     model: 'sign.oca.request.signer',
@@ -1390,7 +1390,7 @@ odoo.define('sign_oca.document_signing', function (require) {
 
             self.do_action({
                 type: "ir.actions.client",
-                tag: 'sign.SignableDocument',
+                tag: 'sign_oca.SignableDocument',
                 name: _t("Sign"),
             }, {
                 additional_context: {

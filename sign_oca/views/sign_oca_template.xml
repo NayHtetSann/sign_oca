@@ -84,7 +84,13 @@
         <field name="model">sign.oca.template</field>
         <field name="arch" type="xml">
             <search>
-            <field name="name" />
+                <field name="attachment_id" string="Document Name"/>
+                <field name="tag_ids"/>
+                <filter name="my_templates" string="My Templates" domain="[('create_uid', '=', uid)]"/>
+                <filter name="favorite" string="My Favorites" domain="[('favorited_ids', 'in', uid)]"/>
+                <searchpanel>
+                    <field name="tag_ids" select="multi" icon="fa-tag" enable_counters="1"/>
+                </searchpanel>
             </search>
         </field>
     </record>
@@ -98,6 +104,7 @@
                 <field name="attachment_id"/>
                 <field name="color"/>
                 <field name="create_date"/>
+                <field name="responsible_count" />
                 <field name="favorited_ids"/>
                 <field name="create_uid"/>
                 <field name="request_count"/>
@@ -144,6 +151,7 @@
                                 <div class="oe_kanban_bottom_left w-50">
                                     <button name="%(sign_oca.action_sign_oca_send_request)d" type="action" class="btn btn-primary btn-sm mt8 o_kanban_sign_send_request" context="{'sign_directly_without_mail': 0}">Send</button>
                                     <button name="%(sign_oca.action_sign_oca_send_request)d" type="action" class="btn btn-primary btn-sm mt8 o_kanban_sign_directly text-truncate" context="{'sign_directly_without_mail': 1}">Sign Now</button>
+                                    <button name="%(sign_oca.action_sign_template_share)d" type="action" class="btn btn-secondary btn-sm mt8" attrs="{'invisible': ['|', ('active', '=', False), ('responsible_count', '&gt;', 1)]}">Share</button>
                                 </div>
                                 <div class="oe_kanban_bottom_right">
                                     <div class="float-right mt8">
@@ -185,7 +193,7 @@
         <field name="res_model">sign.oca.template</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="domain">[]</field>
-        <field name="context">{}</field>
+        <field name="context" eval="{'search_default_favorite': 1}"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No template yet

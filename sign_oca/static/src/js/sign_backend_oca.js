@@ -104,7 +104,7 @@ odoo.define('sign_oca.views_custo', function(require) {
                     return;
                 }
 
-                session.user_has_group('sign_oca.sign_oca_group_user').then(function (has_group) {
+                session.user_has_group('sign_oca.sign_oca_group_manager').then(function (has_group) {
                     if (has_group) {
                         self.$buttons.find(selector_button).after(
                             $('<button class="btn btn-link o-kanban-button-new ml8" type="button">'+ _t('UPLOAD A PDF TEMPLATE') +'</button>').off('click')
@@ -775,7 +775,7 @@ odoo.define('sign.oca.template', function(require) {
 
 
         go_back_to_kanban: function() {
-            return this.do_action("sign.sign_template_action", {
+            return this.do_action("sign_oca.sign_oca_template_act_window", {
                 clear_breadcrumbs: true,
             });
         },
